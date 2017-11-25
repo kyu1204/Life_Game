@@ -10,6 +10,7 @@ C# Term Project
 
 # Function
 >+ Start and Stop
+>+ Can be resized directly
 >+ Save and Load
 >+ Create User Pattern
 >+ GrowthSpeed Control
