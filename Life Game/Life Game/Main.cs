@@ -14,6 +14,7 @@ namespace Life_Game
 {
     public partial class Main : Form
     {
+        readonly object thisLock = new object();
         List<List<Boolean>> cell;
         List<NextCellIndex> nextcell;
         string filename;
@@ -26,6 +27,7 @@ namespace Life_Game
             cell = new List<List<Boolean>>();
             nextcell = new List<NextCellIndex>();
             InitializeComponent();
+
 
             ori_width = this.ClientSize.Width;
             ori_height = this.ClientSize.Height;
@@ -47,9 +49,10 @@ namespace Life_Game
         private void NextGeneration()
         {
             int totalAlive = 0;
-            for(int i=0;i<this.ClientSize.Height;++i)
+
+            for (int i = 0; i < this.ClientSize.Height; ++i)
             {
-                for(int j =0;j<this.ClientSize.Width;++j)
+                for (int j = 0; j < this.ClientSize.Width; ++j)
                 {
                     totalAlive = NeighborCell(j, i, -1, 0)
                         + NeighborCell(j, i, -1, 1)
@@ -75,7 +78,7 @@ namespace Life_Game
                 }
             }
 
-            foreach(NextCellIndex item in nextcell)
+            foreach (NextCellIndex item in nextcell)
             {
                 cell[item.Array_1][item.Array_2] = item.Life;
             }
@@ -85,21 +88,21 @@ namespace Life_Game
 
             ++generation;
             this.Text = generation + "세대";
-            
+
             Invalidate();
         }
-        private int NeighborCell(int x,int y,int offset_x,int offset_y)
+        private int NeighborCell(int x, int y, int offset_x, int offset_y)
         {
             int proposeX = x + offset_x;
             int proposeY = y + offset_y;
 
             bool outOfbounds = proposeX < 0 || proposeX >= this.ClientSize.Width || proposeY < 0 || proposeY >= this.ClientSize.Height;
             if (!outOfbounds)
-                return  cell[proposeY][proposeX] ? 1 : 0; ;
+                return cell[proposeY][proposeX] ? 1 : 0; ;
             return 0;
         }
 
-////////////////Paint////////////////////////
+        ////////////////Paint////////////////////////
         private void DrawRec(Graphics g)
         {
             g.Clear(this.BackColor);
@@ -129,7 +132,7 @@ namespace Life_Game
             }
         }
 
-/////////// Event//////////////////////
+        /////////// Event//////////////////////
         private void Main_MouseDown(object sender, MouseEventArgs e)
         {
             if (e.Button == MouseButtons.Left)
@@ -141,7 +144,7 @@ namespace Life_Game
                 else
                     cell[y][x] = true;
             }
-            if(e.Button == MouseButtons.Right)
+            if (e.Button == MouseButtons.Right)
             {
                 if (timer1.Enabled == true)
                     timer1.Enabled = false;
@@ -306,7 +309,7 @@ namespace Life_Game
                 //Deep Copy
                 for (int i = 0; i < tmp.Count; ++i)
                 {
-                    for(int j = 0; j<tmp[0].Count;++j)
+                    for (int j = 0; j < tmp[0].Count; ++j)
                     {
                         cell[i][j] = tmp[i][j];
                     }
@@ -333,6 +336,15 @@ namespace Life_Game
             MessageBox.Show(string.Format("Mouse_right Click : Start or Stop"));
         }
 
-        
+        private void growthSpeedToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            Speed speedwindow = new Speed(this);
+            speedwindow.SendValue += new Speed.SendValueDelegate(Timer_speed);
+            speedwindow.Show();
+        }
+        private void Timer_speed(int value)
+        {
+            this.timer1.Interval = value;
+        }
     }
 }
