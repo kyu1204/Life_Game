@@ -9,4 +9,4 @@ C# Term Project
 >+ 게임의 상태를 파일로 저장하고 읽을 수 있어야 함
 
 # Run
-![Run][http://cfile3.uf.tistory.com/image/99E259335A190C492DA4CE]
+![Run](http://cfile3.uf.tistory.com/image/99E259335A190C492DA4CE)
