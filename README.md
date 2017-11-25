@@ -8,5 +8,12 @@ C# Term Project
 >+ 멈춤 상태에서 직접 수정이 가능해야 함
 >+ 게임의 상태를 파일로 저장하고 읽을 수 있어야 함
 
+# Function
+>Start and Stop
+>Save and Load
+>Create User Pattern
+>GrowthSpeed Control
+
+
 # Run
 ![Run](http://cfile3.uf.tistory.com/image/99E259335A190C492DA4CE)
