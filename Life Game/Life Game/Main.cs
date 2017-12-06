@@ -14,15 +14,14 @@ namespace Life_Game
 {
     public partial class Main : Form
     {
-        List<NextCellIndex> checklist;
         Cell c;
+        Speed speedwindow;
         string filename;
         int generation = 0;
 
         public Main()
         {
             InitializeComponent();
-            checklist = new List<NextCellIndex>();
 
             c = new Cell(this.ClientSize.Width, this.ClientSize.Height);
 
@@ -33,7 +32,7 @@ namespace Life_Game
 
         private void NextGeneration()
         {
-            c.AliveCell(checklist);
+            c.AliveCell();
 
             ++generation;
             this.Text = generation + "세대";
@@ -85,7 +84,7 @@ namespace Life_Game
                 else
                 {
                     c.cell[y][x] = true;
-                    c.CreateChecklist(checklist, y, x);
+                    c.CreateChecklist(y, x);
                 }
             }
             if (e.Button == MouseButtons.Right)
@@ -123,11 +122,9 @@ namespace Life_Game
                     for (int i = h; i > 0; --i)
                     {
                         c.cell.Add(new List<Boolean>());
-                        //nextcell.Add(new List<Boolean>());
                         for (int j = 0; j < c.ori_width; ++j)
                         {
                             c.cell[this.ClientSize.Height - i].Add(false);
-                            //nextcell[this.ClientSize.Height - i].Add(false);
                         }
                     }
                 }
@@ -138,7 +135,6 @@ namespace Life_Game
                         for (int j = 0; j < w; ++j)
                         {
                             c.cell[i].Add(false);
-                            //nextcell[i].Add(false);
                         }
                     }
                 }
@@ -164,7 +160,7 @@ namespace Life_Game
                 try
                 {
                     filename = spd.FileName;
-                    Serialize(c.cell, filename);
+                    Serialize(filename);
 
                 }
                 catch (Exception ex)
@@ -194,10 +190,9 @@ namespace Life_Game
                     }
 
                     filename = opd.FileName;
-                    Deserialize(c.cell, filename);
+                    Deserialize(filename);
+
                     Invalidate();
-
-
                 }
                 catch (Exception ex)
                 {
@@ -205,7 +200,7 @@ namespace Life_Game
                 }
             }
         }
-        private void Serialize(List<List<Boolean>> cell, String sFileName)
+        private void Serialize(String sFileName)
         {
             FileStream oFS = null;
             BinaryFormatter oBinFormat = null;
@@ -219,8 +214,9 @@ namespace Life_Game
 
                 //현재 세대를 직렬화 한다
                 oBinFormat.Serialize(oFS, generation);
+
                 //리스트를 직렬화한다.
-                oBinFormat.Serialize(oFS, cell);
+                oBinFormat.Serialize(oFS, c);
             }
             catch
             {
@@ -233,11 +229,10 @@ namespace Life_Game
             }
         }
 
-        private void Deserialize(List<List<Boolean>> cell, String sFileName)
+        private void Deserialize(String sFileName)
         {
             FileStream oFS = null;
             BinaryFormatter oBinFormat = null;
-            List<List<Boolean>> tmp;
 
             try
             {
@@ -249,17 +244,8 @@ namespace Life_Game
                 // 세대를 역직렬화 한다.
                 this.generation = (int)oBinFormat.Deserialize(oFS);
                 this.Text = generation + "세대";
-                // 리스트를 역직렬화 한다.   
-                tmp = (List<List<Boolean>>)oBinFormat.Deserialize(oFS);
-
-                //Deep Copy
-                for (int i = 0; i < tmp.Count; ++i)
-                {
-                    for (int j = 0; j < tmp[0].Count; ++j)
-                    {
-                        cell[i][j] = tmp[i][j];
-                    }
-                }
+                // Cell을 역직렬화 한다.   
+                this.c = (Cell)oBinFormat.Deserialize(oFS);
             }
             catch
             {
@@ -284,9 +270,21 @@ namespace Life_Game
 
         private void growthSpeedToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            Speed speedwindow = new Speed(this);
-            speedwindow.SendValue += new Speed.SendValueDelegate(Timer_speed);
-            speedwindow.Show();
+            foreach (Form s in Application.OpenForms)
+            {
+                if (s.Name == "Speed")
+                    speedwindow = (Speed)s;
+                else
+                    speedwindow = null;
+            }
+            if (speedwindow == null)
+            {
+                speedwindow = new Speed(this);
+                speedwindow.SendValue += new Speed.SendValueDelegate(Timer_speed);
+                speedwindow.Show();
+            }
+            else
+                speedwindow.Focus();
         }
         private void Timer_speed(int value)
         {

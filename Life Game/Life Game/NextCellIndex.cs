@@ -6,11 +6,12 @@ using System.Threading.Tasks;
 
 namespace Life_Game
 {
-    class NextCellIndex
+    [Serializable]
+    class NextCellIndex //변경예정 및 체크에 사용되는 특정 셀의 정보
     {
-        private int array_1;
+        private int array_1; //해당 위치값
         private int array_2;
-        private bool life;
+        private bool life; //해당 셀의 상태
 
         public int Array_1 { get { return array_1; } }
         public int Array_2 { get { return array_2; } }

@@ -37,18 +37,19 @@
             // lb_speed
             // 
             this.lb_speed.AutoSize = true;
-            this.lb_speed.Location = new System.Drawing.Point(12, 19);
+            this.lb_speed.Location = new System.Drawing.Point(10, 15);
             this.lb_speed.Name = "lb_speed";
-            this.lb_speed.Size = new System.Drawing.Size(161, 15);
+            this.lb_speed.Size = new System.Drawing.Size(136, 12);
             this.lb_speed.TabIndex = 0;
             this.lb_speed.Text = "성장 속도(millisecond):";
             // 
             // trackBar1
             // 
             this.trackBar1.LargeChange = 100;
-            this.trackBar1.Location = new System.Drawing.Point(15, 46);
+            this.trackBar1.Location = new System.Drawing.Point(13, 37);
+            this.trackBar1.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.trackBar1.Name = "trackBar1";
-            this.trackBar1.Size = new System.Drawing.Size(255, 56);
+            this.trackBar1.Size = new System.Drawing.Size(223, 45);
             this.trackBar1.SmallChange = 100;
             this.trackBar1.TabIndex = 100;
             this.trackBar1.TickFrequency = 100;
@@ -58,20 +59,22 @@
             // lb_value
             // 
             this.lb_value.AutoSize = true;
-            this.lb_value.Location = new System.Drawing.Point(179, 19);
+            this.lb_value.Location = new System.Drawing.Point(157, 15);
             this.lb_value.Name = "lb_value";
-            this.lb_value.Size = new System.Drawing.Size(0, 15);
+            this.lb_value.Size = new System.Drawing.Size(0, 12);
             this.lb_value.TabIndex = 2;
             // 
             // Speed
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 15F);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(282, 110);
+            this.ClientSize = new System.Drawing.Size(247, 88);
             this.Controls.Add(this.lb_value);
             this.Controls.Add(this.trackBar1);
             this.Controls.Add(this.lb_speed);
+            this.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.Name = "Speed";
+            this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
             this.Text = "Speed";
             ((System.ComponentModel.ISupportInitialize)(this.trackBar1)).EndInit();
             this.ResumeLayout(false);
