@@ -14,32 +14,17 @@ namespace Life_Game
 {
     public partial class Main : Form
     {
-        readonly object thisLock = new object();
-        List<List<Boolean>> cell;
-        List<NextCellIndex> nextcell;
+        List<NextCellIndex> checklist;
+        Cell c;
         string filename;
-        int ori_width;
-        int ori_height;
         int generation = 0;
 
         public Main()
         {
-            cell = new List<List<Boolean>>();
-            nextcell = new List<NextCellIndex>();
             InitializeComponent();
+            checklist = new List<NextCellIndex>();
 
-
-            ori_width = this.ClientSize.Width;
-            ori_height = this.ClientSize.Height;
-
-            for (int i = 0; i < ori_height; ++i)
-            {
-                cell.Add(new List<Boolean>());
-                for (int j = 0; j < ori_width; ++j)
-                {
-                    cell[i].Add(false);
-                }
-            }
+            c = new Cell(this.ClientSize.Width, this.ClientSize.Height);
 
             this.Text = generation + "세대";
 
@@ -48,69 +33,23 @@ namespace Life_Game
 
         private void NextGeneration()
         {
-            int totalAlive = 0;
-
-            for (int i = 0; i < this.ClientSize.Height; ++i)
-            {
-                for (int j = 0; j < this.ClientSize.Width; ++j)
-                {
-                    totalAlive = NeighborCell(j, i, -1, 0)
-                        + NeighborCell(j, i, -1, 1)
-                        + NeighborCell(j, i, 0, 1)
-                        + NeighborCell(j, i, 1, 1)
-                        + NeighborCell(j, i, 1, 0)
-                        + NeighborCell(j, i, 1, -1)
-                        + NeighborCell(j, i, 0, -1)
-                        + NeighborCell(j, i, -1, -1);
-
-                    if (cell[i][j] && (totalAlive == 2 || totalAlive == 3))
-                    {
-                        nextcell.Add(new NextCellIndex(i, j, true));
-                    }
-                    else if (!cell[i][j] && totalAlive == 3)
-                    {
-                        nextcell.Add(new NextCellIndex(i, j, true));
-                    }
-                    else
-                    {
-                        nextcell.Add(new NextCellIndex(i, j, false));
-                    }
-                }
-            }
-
-            foreach (NextCellIndex item in nextcell)
-            {
-                cell[item.Array_1][item.Array_2] = item.Life;
-            }
-
-
-            nextcell.Clear();
+            c.AliveCell(checklist);
 
             ++generation;
             this.Text = generation + "세대";
 
             Invalidate();
         }
-        private int NeighborCell(int x, int y, int offset_x, int offset_y)
-        {
-            int proposeX = x + offset_x;
-            int proposeY = y + offset_y;
-
-            bool outOfbounds = proposeX < 0 || proposeX >= this.ClientSize.Width || proposeY < 0 || proposeY >= this.ClientSize.Height;
-            if (!outOfbounds)
-                return cell[proposeY][proposeX] ? 1 : 0; ;
-            return 0;
-        }
 
         ////////////////Paint////////////////////////
         private void DrawRec(Graphics g)
         {
             g.Clear(this.BackColor);
-            for (int i = 0; i < ori_height; ++i)
+            for (int i = 0; i < c.ori_height; ++i)
             {
-                for (int j = 0; j < ori_width; ++j)
+                for (int j = 0; j < c.ori_width; ++j)
                 {
-                    if (cell[i][j])
+                    if (c.cell[i][j])
                     {
                         g.FillRectangle(Brushes.Black, (j * 10), (i * 10), 10, 10);
                     }
@@ -139,10 +78,15 @@ namespace Life_Game
             {
                 int x = (int)e.X / 10;
                 int y = (int)e.Y / 10;
-                if (cell[y][x] == true)
-                    cell[y][x] = false;
+                if (c.cell[y][x] == true)
+                {
+                    c.cell[y][x] = false;
+                }
                 else
-                    cell[y][x] = true;
+                {
+                    c.cell[y][x] = true;
+                    c.CreateChecklist(checklist, y, x);
+                }
             }
             if (e.Button == MouseButtons.Right)
             {
@@ -167,20 +111,22 @@ namespace Life_Game
 
         private void Main_ClientSizeChanged(object sender, EventArgs e)
         {
-            if (cell.Count != 0)
+            if (c == null)
+                return;
+            if (c.cell.Count != 0)
             {
-                int h = this.ClientSize.Height - ori_height;
-                int w = this.ClientSize.Width - ori_width;
+                int h = this.ClientSize.Height - c.ori_height;
+                int w = this.ClientSize.Width - c.ori_width;
 
                 if (h > 0)
                 {
                     for (int i = h; i > 0; --i)
                     {
-                        cell.Add(new List<Boolean>());
+                        c.cell.Add(new List<Boolean>());
                         //nextcell.Add(new List<Boolean>());
-                        for (int j = 0; j < ori_width; ++j)
+                        for (int j = 0; j < c.ori_width; ++j)
                         {
-                            cell[this.ClientSize.Height - i].Add(false);
+                            c.cell[this.ClientSize.Height - i].Add(false);
                             //nextcell[this.ClientSize.Height - i].Add(false);
                         }
                     }
@@ -191,14 +137,14 @@ namespace Life_Game
                     {
                         for (int j = 0; j < w; ++j)
                         {
-                            cell[i].Add(false);
+                            c.cell[i].Add(false);
                             //nextcell[i].Add(false);
                         }
                     }
                 }
             }
-            ori_height = this.ClientSize.Height;
-            ori_width = this.ClientSize.Width;
+            c.ori_height = this.ClientSize.Height;
+            c.ori_width = this.ClientSize.Width;
 
             Invalidate();
         }
@@ -218,7 +164,7 @@ namespace Life_Game
                 try
                 {
                     filename = spd.FileName;
-                    Serialize(cell, filename);
+                    Serialize(c.cell, filename);
 
                 }
                 catch (Exception ex)
@@ -248,7 +194,7 @@ namespace Life_Game
                     }
 
                     filename = opd.FileName;
-                    Deserialize(cell, filename);
+                    Deserialize(c.cell, filename);
                     Invalidate();
 
 
@@ -333,7 +279,7 @@ namespace Life_Game
 
         private void helpToolStripMenuItem1_Click(object sender, EventArgs e)
         {
-            MessageBox.Show(string.Format("Mouse_right Click : Start or Stop"));
+            MessageBox.Show(string.Format("Mouse_Left Click : Create Cell\nMouse_Right Click : Start or Stop"));
         }
 
         private void growthSpeedToolStripMenuItem_Click(object sender, EventArgs e)

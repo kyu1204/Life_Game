@@ -17,8 +17,6 @@ namespace Life_Game
         public Speed()
         {
             InitializeComponent();
-            
-
         }
         public Speed(Main form)
         {
