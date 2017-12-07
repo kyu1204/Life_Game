@@ -16,6 +16,7 @@ namespace Life_Game
     {
         Cell c;
         Speed speedwindow;
+        Brush b;
         string filename;
         int generation = 0;
 
@@ -24,6 +25,8 @@ namespace Life_Game
             InitializeComponent();
 
             c = new Cell(this.ClientSize.Width, this.ClientSize.Height);
+
+            b = Brushes.Black;
 
             this.Text = generation + "세대";
 
@@ -50,7 +53,7 @@ namespace Life_Game
                 {
                     if (c.cell[i][j])
                     {
-                        g.FillRectangle(Brushes.Black, (j * 10), (i * 10), 10, 10);
+                        g.FillRectangle(b, (j * 10), (i * 10), 10, 10);
                     }
                 }
             }
@@ -215,6 +218,9 @@ namespace Life_Game
                 //현재 세대를 직렬화 한다
                 oBinFormat.Serialize(oFS, generation);
 
+                Color b_color = (b as SolidBrush).Color;
+                oBinFormat.Serialize(oFS, b_color);
+
                 //리스트를 직렬화한다.
                 oBinFormat.Serialize(oFS, c);
             }
@@ -244,8 +250,12 @@ namespace Life_Game
                 // 세대를 역직렬화 한다.
                 this.generation = (int)oBinFormat.Deserialize(oFS);
                 this.Text = generation + "세대";
+
+                Color b_color = (Color)oBinFormat.Deserialize(oFS);
+                this.b = new SolidBrush(b_color);
                 // Cell을 역직렬화 한다.   
                 this.c = (Cell)oBinFormat.Deserialize(oFS);
+                this.ClientSize = new Size(c.ori_width, c.ori_height);
             }
             catch
             {
@@ -255,6 +265,7 @@ namespace Life_Game
             {
                 if (oFS != null)
                     oFS.Close();
+                Invalidate();
             }
         }
 
@@ -265,7 +276,7 @@ namespace Life_Game
 
         private void helpToolStripMenuItem1_Click(object sender, EventArgs e)
         {
-            MessageBox.Show(string.Format("Mouse_Left Click : Create Cell\nMouse_Right Click : Start or Stop"));
+            MessageBox.Show(string.Format("Left Click : Create Cell\nRight Click : Start or Stop"));
         }
 
         private void growthSpeedToolStripMenuItem_Click(object sender, EventArgs e)
@@ -289,6 +300,17 @@ namespace Life_Game
         private void Timer_speed(int value)
         {
             this.timer1.Interval = value;
+        }
+
+        private void cellColorToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            ColorDialog cd = new ColorDialog();
+
+            if(cd.ShowDialog() == DialogResult.OK)
+            {
+                b = new SolidBrush(cd.Color);
+            }
+            Invalidate();
         }
     }
 }

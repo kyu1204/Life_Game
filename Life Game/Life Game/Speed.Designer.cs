@@ -28,6 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Speed));
             this.lb_speed = new System.Windows.Forms.Label();
             this.trackBar1 = new System.Windows.Forms.TrackBar();
             this.lb_value = new System.Windows.Forms.Label();
@@ -72,6 +73,7 @@
             this.Controls.Add(this.lb_value);
             this.Controls.Add(this.trackBar1);
             this.Controls.Add(this.lb_speed);
+            this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.Name = "Speed";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
