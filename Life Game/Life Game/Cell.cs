@@ -1,21 +1,40 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Text;
 using System.Threading.Tasks;
 
 namespace Life_Game
 {
-    class DistinctItemComparer : IEqualityComparer<NextCellIndex> //중복제거 
+    class DistinctItemComparer : IEqualityComparer<NextCellIndex>,IQueryable<NextCellIndex> //중복제거 
     {
+        public Expression Expression => throw new NotImplementedException();
+
+        public Type ElementType => throw new NotImplementedException();
+
+        public IQueryProvider Provider => throw new NotImplementedException();
+
         public bool Equals(NextCellIndex x, NextCellIndex y)
         {
             return (x.Array_1 == y.Array_1) && (x.Array_2 == y.Array_2) && (x.Life == y.Life);
         }
 
+        public IEnumerator<NextCellIndex> GetEnumerator()
+        {
+            throw new NotImplementedException();
+        }
+
         public int GetHashCode(NextCellIndex obj)
         {
             return obj.Array_1.GetHashCode() ^ obj.Array_2.GetHashCode() ^ obj.Life.GetHashCode();
+        }
+
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            throw new NotImplementedException();
         }
     }
     [Serializable]
@@ -23,7 +42,7 @@ namespace Life_Game
     {
         public List<List<Boolean>> cell;
         public List<NextCellIndex> nextcell;
-        public List<NextCellIndex> checklist;
+        public Dictionary<Point,NextCellIndex> checklist; 
 
         public int ori_width;
         public int ori_height;
@@ -32,7 +51,7 @@ namespace Life_Game
         {
             cell = new List<List<bool>>(); //창 크기를 받아와 1:1로 매칭되는 셀 테이블 생성
             nextcell = new List<NextCellIndex>(); //NextGeneration 시 변경예정목록
-            checklist = new List<NextCellIndex>();
+            checklist = new Dictionary<Point, NextCellIndex>(); //체크리스트를 해쉬테이블을 사용하는 Dictionary를 사용-> 매우 빠른속도로 대량의 데이터의 접근 가능
             ori_width = w; //현재 창의 가로
             ori_height = h; //현재 창의 세로
 
@@ -56,20 +75,17 @@ namespace Life_Game
             OutofBoundsCheck(h-1, w+1);
             OutofBoundsCheck(h-1, w);
             OutofBoundsCheck(h-1, w-1);
-
-            IEnumerable<NextCellIndex> check = checklist.Distinct(new DistinctItemComparer()); //중복 방지 Distinct로 중복 셀 제거 -> DistinctItemComparer 생성해서 Equals 지정
-            List<NextCellIndex> tmp = check.ToList(); //열거자가 가지고있는 Result View 요소를 List화 시켜서 tmp에 저장
-            checklist.Clear(); //중복제거 하기전 기존 체크리스트 비우기
-            for(int i = 0; i<tmp.Count;++i)
-            {
-                checklist.Add(tmp[i]); //중복제거된 요소로 재등록
-            }
         }
+
         void OutofBoundsCheck(int y, int x)
         {
+            Point p = new Point(x, y);
             bool outOfbounds = x < 0 || x >= ori_width || y < 0 || y >= ori_height; //창 크기를 벗어나는지 검사
-            if (!outOfbounds)
-                checklist.Add(new NextCellIndex(y, x, true)); //벗어나지 않으면 체크리스트에 등록
+            if (!outOfbounds) //창을 벗어나지 않으면
+            {
+                if (!checklist.ContainsKey(p)) //현재 입력된 위치 (키값)이 이미 존재하는지 검사 --> 중복 금지
+                    checklist[p] = new NextCellIndex(y, x, true); //등록된 키값의 value가 없으면 Dictionary에 현재 위치 Point 를 키값으로 셀 등록
+            }
         }
 
         int NeighborCell(int x, int y, int offset_x, int offset_y) //이웃 셀 검사 함수
@@ -86,9 +102,9 @@ namespace Life_Game
         {
             int totalAlive = 0;
 
-            foreach(NextCellIndex item in checklist) //기존 전체 화면 전체크기의 셀 검사에서 체크된 셀 주변 8개(중복제외)만 검사(checklist)
-            {
-                int h = item.Array_1, w = item.Array_2; //체크리스트에 등록된 셀의 주변 셀 검사
+            foreach(KeyValuePair<Point,NextCellIndex> item in checklist) //기존 전체 화면 전체크기의 셀 검사에서 체크된 셀 주변 8개(중복제외)만 검사(checklist)
+            { //체크리스트에서 하나씩 가져와서 검사
+                int h = item.Value.Array_1, w = item.Value.Array_2; //체크리스트에 등록된 셀의 주변 셀 검사
                 totalAlive = NeighborCell(w, h, -1, 0)  //지금 셀 기준으로 주변셀의 생존 개수 얻어오기
                         + NeighborCell(w, h, -1, 1)
                         + NeighborCell(w, h, 0, 1)
@@ -113,8 +129,8 @@ namespace Life_Game
 
             foreach (NextCellIndex item in nextcell) //nextcell에 들어있는 셀들의 상태만 골라서 전체 셀에 적용
             {
-                cell[item.Array_1][item.Array_2] = item.Life;
-                if (item.Life)
+                cell[item.Array_1][item.Array_2] = item.Life; 
+                if (item.Life) //추가적으로 살아난 셀들의 주변 셀만 검사하기위해 CreateChecklist 알고리즘을 사용해 체크리스트에 셀 추가
                     CreateChecklist(item.Array_1, item.Array_2);
             }
 
