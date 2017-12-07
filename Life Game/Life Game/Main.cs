@@ -18,6 +18,7 @@ namespace Life_Game
         Speed speedwindow;
         Brush b;
         string filename;
+        bool moved;
         int generation = 0;
 
         public Main()
@@ -74,10 +75,27 @@ namespace Life_Game
         }
 
         /////////// Event//////////////////////
+
+        private void Main_MouseMove(object sender, MouseEventArgs e)
+        {
+            if (moved == true)
+            {
+                int x = (int)e.X / 10;
+                int y = (int)e.Y / 10;
+                if (!c.cell[y][x] == true)
+                {
+                    c.cell[y][x] = true;
+                    c.CreateChecklist(y, x);
+                }
+                Invalidate();
+            }
+
+        }
         private void Main_MouseDown(object sender, MouseEventArgs e)
         {
             if (e.Button == MouseButtons.Left)
             {
+                moved = true;
                 int x = (int)e.X / 10;
                 int y = (int)e.Y / 10;
                 if (c.cell[y][x] == true)
@@ -311,6 +329,11 @@ namespace Life_Game
                 b = new SolidBrush(cd.Color);
             }
             Invalidate();
+        }
+
+        private void Main_MouseUp(object sender, MouseEventArgs e)
+        {
+            moved = false;
         }
     }
 }
